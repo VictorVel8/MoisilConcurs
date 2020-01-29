@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    <style>
+
+
+
+    </style>
+
+    <script>
+    var graph = {}, nr = 0;
+    var template = `
+	  	<svg xmlns="http://www.w3.org/2000/svg" x="-50" y="-50" width="100" height="100" class="node">
+	    	<circle cx="50%" cy="50%" r="25%"  style="cursor:pointer;stroke:black;fill:none;stroke-width:5px"/>
+	    	<text id="text" x="50%" y="50%" style="fill:black;font-size: 100%;font-weight:bold;text-anchor: middle;widht:5px">idk</text>
+	    </svg>`;
+    var path_template = `<path xmlns="http://www.w3.org/2000/svg" id="path" d="" stroke="black"/>`;
+
+    function get_node_pos(node){
+			let offset = Number(node.getAttribute("width"))/2
+			return [Number(node.getAttribute("x"))+offset, Number(node.getAttribute("y"))+offset]
+		}
+
+		function add_path(n1, n2){
+      n1 = document.getElementById("node-"+n1)
+      n2 = document.getElementById("node-"+n2)
+
+			var paths = document.getElementById("paths")
+
+			var path = new DOMParser().parseFromString(path_template, "image/svg+xml").firstChild
+
+			let p1 = get_node_pos(n1)
+			let p2 = get_node_pos(n2)
+
+			path.setAttribute("d", "M"+p1[0]+" "+p1[1]+" "+p2[0]+" "+p2[1])
+			console.log(path.getAttribute("d"))
+			paths.appendChild(path)
+		}
+
+    function addNode(x, y, text) {
+        if (text === null) {
+            text = nr.toString();
+            ++nr;
+        }
+        var father = document.getElementById('father');
+        var circle = new DOMParser().parseFromString(template, "image/svg+xml").firstChild;
+        circle.setAttribute("x", Number(circle.getAttribute("x")) + x);
+        circle.setAttribute("y", Number(circle.getAttribute("y")) + y);
+        circle.setAttribute("id", "node-"+text);
+  			circle.getElementById("text").innerHTML = text;
+  			father.appendChild(circle);
+    }
+
+    function removeGraph() {
+        var elements = document.getElementsByClassName('node');
+
+        while(elements.length > 0)
+            elements[0].parentNode.removeChild(elements[0]);
+    }
+
+    function getRandomNumber(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function processInput() {
+        removeGraph();
+        var textBox = document.getElementById('textBox');
+        var input = textBox.value.split(/\s+/g);
+        var size = input.length;
+        nr = Number(input[0]);
+        for (let i = 1; i <= nr; ++i) {
+            graph[input[i]] = [];
+            addNode(getRandomNumber(100, 400), getRandomNumber(100, 400), input[i]);
+        }
+
+        for (let i = nr + 1; i < size; i += 2) {
+            graph[input[i]].push(input[i + 1]);
+            graph[input[i + 1]].push(input[i]);
+            console.log(input[i]);
+            add_path(input[i], input[i + 1]);
+
+        }
+      }
+
+    </script>
+</head>
+
+<body>
+
+<div style = 'height: 100%; margin-top: 100px'>
+
+    <div style = 'width: 500px; height: 500px; border-style: solid; border-width: medium; display: inline-block; float: left'>
+        <textarea id = 'textBox' style = 'height: 70%; width: 90%; resize: none;'>
+
+        </textarea>
+        <button type = 'button' onclick = 'processInput()' style = 'width: 100px; height: 10%'>
+            Create graph.
+        </button>
+
+    </div>
+
+    <div style = 'width: 500px; height: 500px; border-style: solid; border-width: medium; display: inline-block'
+    onclick = 'addNode(event.offsetX, event.offsetY, null)'>
+    <svg style = 'width: 500px; height: 500px'>
+        <g onclick = 'alert("click!")' style = 'cursor:pointer' id = 'father'>
+        </g>
+        <g id = 'paths'>
+        </g>
+    </svg>
+    </div>
+
+</div>
+
+</body>
+</html>
