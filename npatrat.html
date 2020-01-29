@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+    <textarea id="arrId" rows="1" cols="100"></textarea>
+    <button id="btnOk">Sort it</button>
+    <svg id="s" width="2000" height="200"xmlns="http://www.w3.org/2000/svg">
+        <g id="s1">
+        </g>
+    </svg>
+    
+    <script type="text/javascript">
+
+        function makeSVG(tag, attrs, valoare) {
+            var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (var k in attrs)
+                el.setAttribute(k, attrs[k]);
+            if(tag=='text')
+                el.textContent=''+valoare;
+            return el;
+        }
+
+        var arr;
+        var indici=[];
+        var l1;
+        $("#btnOk").click(function(){
+            arr=$("#arrId").val().split(' ');
+            l1=arr.length;
+            for (var i=0; i<l1; ++i)
+                {
+                    indici[i]=i;
+                    arr[i]=Number(arr[i]);
+                }
+           incepere_animare(arr,l1);
+        });
+
+        var myTime1;
+        var myTime2;
+
+        function incepere_animare(arr, l1)
+        {
+            myTime1=setInterval(create,500);
+        }
+
+        function create_square(xx, yy, ind)
+        {
+            var clasa="cls";
+            var alta="cla";
+            var square= makeSVG('rect', {id:clasa+ind,class: clasa+ind,x: xx, y: yy, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'white'},0);
+            var numar = makeSVG('text',{id:alta+ind,class:clasa+ind,x:xx+20,y:yy+20},arr[ind]);
+            document.getElementById('s1').appendChild(square);
+            document.getElementById('s1').append(numar);
+        }
+
+        var ind=0;
+        var x=50, y=50;
+        var i=1, j=0;
+        function create()
+        {
+            create_square(x,y,ind);
+            ind++;
+            x+=100;
+            if (ind>=l1)
+            {
+                clearInterval(myTime1);
+               // $("svg").find("#cls1").css({fill:'grey'});
+                myTime2=setInterval(sortare,1000);
+               //sortare();
+            }
+        }
+        var ind1,ind2;
+
+        function sortare()
+        {
+            if (j==i)
+            {
+                ++i;
+                j=0;
+                if (i==l1)
+                {
+                    clearInterval(myTime2);
+                }
+            }
+            if (arr[indici[i]]<arr[indici[j]])
+            {
+                $("svg").find("#cls"+i).css({fill:'grey'});
+                $("svg").find("#cls"+j).css({fill:'grey'});
+                ind1=i;
+                ind2=j;
+                setTimeout(schimbare,500);
+            }
+            else
+            {
+                var loc1, loc2;
+                $("svg").find("#cls"+i).css({fill:'yellow'});
+                $("svg").find("#cls"+j).css({fill:'yellow'});
+                loc1=i;
+                loc2=j;
+                setTimeout(function(){
+                    $("svg").find("#cls"+loc1).css({fill:'white'});
+                     $("svg").find("#cls"+loc2).css({fill:'white'});
+                },500);
+            }
+            ++j;
+        }
+        
+        function schimbare()
+        {
+            var aux,v1=arr[indici[ind2]],v2=arr[indici[ind1]];;
+           // aux=arr[indici[ind1]];
+           // arr[indici[ind1]]=arr[indici[ind2]];
+           // arr[indici[ind2]]=aux;
+            $("#cla"+ind1).text(''+arr[indici[ind2]]);
+            $("#cla"+ind2).text(''+arr[indici[ind1]]);
+            aux=indici[ind1];
+            indici[ind1]=indici[ind2];
+            indici[ind2]=aux;
+            $("svg").find("#cls"+ind1).css({fill:'white'});
+            $("svg").find("#cls"+ind2).css({fill:'white'});
+        }
+
+    </script>
+</body>
+</html>

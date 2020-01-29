@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <textarea id="arr1Id" rows="1" cols="50"></textarea>
+    <textarea id="arr2Id" rows="1" cols="50"></textarea>
+    <button id="btnOk">Sort it</button>
+    <svg id="s" width="1500" height="200"xmlns="http://www.w3.org/2000/svg">
+        <g id="s1">
+        </g>
+    </svg>
+    <svg width="1800" height="200" xmlns="http://www.w3.org/2000/svg">
+        <g id="sortat">
+
+        </g>
+    </svg>
+    <svg width="1500" height="200" xmlns="http://www.w3.org/2000/svg">
+        <g id="s2">
+
+        </g>
+    </svg>
+
+
+    <script type="text/javascript">
+        var arr1, arr2;
+        var l1;
+        var l2;
+        $("#btnOk").click(function(){
+            arr1=$("#arr1Id").val().split(' ');
+            arr2=$("#arr2Id").val().split(' ');
+            l1=arr1.length;
+            l2=arr2.length;
+            for (var i=0; i<l1; ++i)
+                arr1[i]=Number(arr1[i]);
+            for (var i=0; i<l2; ++i)
+                arr2[i]=Number(arr2[i]);
+               if(verificare_crescator(arr1,l1,arr2,l2)==false)
+                {
+                alert("numerele nu sunt crescatoare");
+                }
+            else
+            {
+                incepe_animare(arr1,l1,arr2,l2);
+            }
+        });
+
+        function verificare_crescator(arr1, l1, arr2, l2)
+        {
+            for (var i=1; i<l1; ++i)
+            {
+                if (arr1[i]<arr1[i-1])
+                    return false;
+            }
+            for (var i=1; i<l2; ++i)
+            {
+                if (arr2[i]<arr2[i-1])
+                return false;
+            }
+            return true;
+        }
+        var myTime1;
+        var myTime2;
+        var myTime3;
+        function incepe_animare(arr1, l1, arr2, l2)
+        {
+             myTime1 = setInterval(square_line_1,1000);
+        }
+
+        
+        ///Creeaza SVG cu atributele necesare, daca e text adauga si mesajul
+        function makeSVG(tag, attrs, valoare) {
+            var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (var k in attrs)
+                el.setAttribute(k, attrs[k]);
+            if(tag=='text')
+                el.textContent=''+valoare;
+            return el;
+        }
+        function create_square1(xx,yy, ind, id_linie)
+        {
+            var clasa;
+            if(id_linie=='s1')
+                clasa="cls1_";
+            else
+                clasa="cls2_";
+            var square= makeSVG('rect', {class: clasa+ind,x: xx, y: yy, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'white'},0);
+            var numar = makeSVG('text',{class:clasa+ind,x:xx+20,y:yy+20},arr1[ind]);
+            document.getElementById(id_linie).appendChild(square);
+            document.getElementById(id_linie).append(numar);
+        }
+
+        function create_square2(xx,yy, ind, id_linie)
+        {
+            var clasa;
+            if(id_linie==1)
+                clasa="cls1_";
+            else
+                clasa="cls2_";
+            var square= makeSVG('rect', {class: clasa+ind,x: xx, y: yy, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'white'},0);
+            var numar = makeSVG('text',{class:clasa+ind,x:xx+20,y:yy+20},arr2[ind]);
+            document.getElementById(id_linie).appendChild(square);
+            document.getElementById(id_linie).append(numar);
+        }
+
+        var x1=50;
+        var ind1=0;
+        var y1=50;
+        function square_line_1()
+        {
+            
+            create_square1(x1,y1,ind1,'s1');
+            ind1++;
+            x1+=100;
+            if (ind1>=l1)
+            {
+                clearInterval(myTime1);
+                myTime2 = setInterval(square_line_2,1000);
+            }
+            ///Aici cand se termina de pus patratele
+           /* if(x1==450)
+               {
+                   clearInterval(myTime);
+                  // $(".cls2").remove();
+               }*/
+        }
+        var x2=50;
+        var ind2=0;
+        var y2=50;
+        function square_line_2()
+        {
+            create_square2(x2,y2,ind2,'s2');
+            ind2++;
+            x2+=100;
+            if (ind2>=l2)
+            {
+                clearInterval(myTime2);
+
+                myTime3=setInterval(interclasare,1000);
+            }
+            
+        }
+
+        var i1=0, i2=0, xx=50, yy=50, ind=0;
+        function interclasare()
+        {
+        
+            var clasa, clasa_sters;
+            if (i1<l1 && i2<l2)
+            {
+                if (arr1[i1]<=arr2[i2])
+                {
+                    clasa="clf";
+                    var square= makeSVG('rect', {class: clasa+ind,x: xx, y: yy, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'white'},0);
+                    var numar = makeSVG('text',{class:clasa+ind,x:xx+20,y:yy+20},arr1[i1]);
+                    document.getElementById("sortat").appendChild(square);
+                    document.getElementById("sortat").append(numar);
+                    clasa_sters=".cls1_"+i1;
+                    $(clasa_sters).remove();
+                    i1=i1+1;
+               }
+               else
+               {
+                    clasa="clf";
+                    var square= makeSVG('rect', {class: clasa+ind,x: xx, y: yy, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'white'},0);
+                    var numar = makeSVG('text',{class:clasa+ind,x:xx+20,y:yy+20},arr2[i2]);
+                    document.getElementById("sortat").appendChild(square);
+                    document.getElementById("sortat").append(numar);
+                    clasa_sters=".cls2_"+i2;
+                    $(clasa_sters).remove();
+                    i2=i2+1;
+               }
+                
+            }
+            else
+            {
+                if (i1<l1)
+                {
+                    clasa="clf";
+                    var square= makeSVG('rect', {class: clasa+ind,x: xx, y: yy, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'white'},0);
+                    var numar = makeSVG('text',{class:clasa+ind,x:xx+20,y:yy+20},arr1[i1]);
+                    document.getElementById("sortat").appendChild(square);
+                    document.getElementById("sortat").append(numar);
+                    clasa_sters=".cls1_"+i1;
+                    $(clasa_sters).remove();
+                    i1=i1+1;
+                }
+                else if (i2<l2)
+                {
+                    clasa="clf";
+                    var square= makeSVG('rect', {class: clasa+ind,x: xx, y: yy, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'white'},0);
+                    var numar = makeSVG('text',{class:clasa+ind,x:xx+20,y:yy+20},arr2[i2]);
+                    document.getElementById("sortat").appendChild(square);
+                    document.getElementById("sortat").append(numar);
+                    clasa_sters=".cls2_"+i2;
+                    $(clasa_sters).remove();
+                    i2=i2+1;
+                }
+                else
+                {
+                    clearInterval(myTime3);
+                }
+            }
+            
+            ++ind;
+            xx+=100;
+
+        }
+
+
+    </script>
+</body>
+</html>
