@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="nav.css">
+    <link rel="stylesheet" type="text/css" href="button.css">
+</head>
+<body>
+  <nav>
+    <ul>
+      <li>
+        <a href="main.html">Graph simulator</a>
+      </li>
+      <li>
+        <a href="npatrat.html">Sorting algorithm</a>
+      </li>
+      <li>
+        <a href="bitbucket.html">Binary search algorithm</a>
+      </li>
+      <li>
+        <a href="interclasare.html">Interclasation</a>
+      </li>
+    </ul>
+    </nav>
+    <textarea id="arrId" rows="1" cols="100"></textarea>
+    <button class = "btn third" id="btnOk">Find number!</button>
+    <svg id="s" width="2000" height="200"xmlns="http://www.w3.org/2000/svg">
+        <g id="s1">
+        </g>
+    </svg>
+
+    <script type="text/javascript">
+
+    function makeSVG(tag, attrs, valoare) {
+            var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (var k in attrs)
+                el.setAttribute(k, attrs[k]);
+            if(tag=='text')
+                el.textContent=''+valoare+'\n';
+            return el;
+        }
+
+    var l1;
+    var arr;
+    var dorit;
+    var marime;
+    var indici=[];
+    $("#btnOk").click(function(){
+            arr=$("#arrId").val().split(' ');
+            l1=arr.length;
+            marime=l1;
+            for (var i=0; i<l1; ++i)
+                {
+                    indici[i]=i;
+                    arr[i]=Number(arr[i]);
+                }
+            dorit=arr[l1-1];
+            l1--;
+            dreapta=l1-1;
+
+           incepere_animare(arr,l1);
+        });
+
+        var stanga=0, mijloc;
+        var dreapta;
+        var myTime1;
+        var myTime2;
+
+        function incepere_animare(arr, l1)
+        {
+            myTime1=setInterval(create,500);
+        }
+
+        function calc_binar(numar)
+        {
+            var val=1;
+            while(val<numar)
+                val*=2;
+            val/=2;
+            var rez='';
+            while(val>=1)
+            {
+                if(val<=numar)
+                {
+                    numar-=val;
+                    rez+='1';
+                }
+                else
+                    rez+='0';
+                val/=2;
+            }
+            return rez;
+        }
+
+        function create_square(xx, yy, ind)
+        {
+            var clasa="cls";
+            var alta="cla";
+            //var binar=calc_binar(arr[ind]);
+            var square= makeSVG('rect', {id:clasa+ind,class: clasa+ind,x: xx, y: yy,rx:20, ry:20, width:100,height:100, stroke: 'black', 'stroke-width': 2, fill: 'red',opacity:0.5},0);
+            var numar = makeSVG('text',{id:alta+ind,class:clasa+ind,x:xx+20,y:yy+20},arr[ind]);
+           // var binar = makeSVG('text',{id:alta+ind,class:clasa+ind,x:xx+20,y:yy+40},binar);
+            document.getElementById('s1').appendChild(square);
+            document.getElementById('s1').append(numar);
+            //document.getElementById('s1').append(binar);
+        }
+
+        var ind=0;
+        var x=50, y=50;
+        var i=1, j=0;
+        function create()
+        {
+            create_square(x,y,ind);
+            ind++;
+            x+=100;
+            if (ind>=l1)
+            {
+                clearInterval(myTime1);
+                myTime2=setInterval(impartire,1000);
+               // $("svg").find("#cls1").css({fill:'grey'});
+                //myTime2=setInterval(sortare,1000);
+               //sortare();
+            }
+        }
+
+        function impartire()
+        {
+            mijloc=Math.floor((stanga+dreapta)/2);
+            if (arr[mijloc]==dorit)
+            {
+                $("svg").find("#cls"+mijloc).css({fill:'yellow'});
+                clearInterval(myTime2);
+            }
+            else if (arr[mijloc]<dorit)
+            {
+                for (var i=stanga; i<=mijloc; ++i)
+                {
+                    $("svg").find("#cls"+i).css({fill:'grey'});
+                }
+                stanga=mijloc+1;
+
+            }
+            else
+            {
+                for (var i=dreapta; i>=mijloc; --i)
+                {
+                    $("svg").find("#cls"+i).css({fill:'grey'});
+                }
+                dreapta=mijloc-1;
+            }
+        }
+
+    </script>
+</body>
+</html>

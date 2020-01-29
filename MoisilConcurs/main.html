@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link rel="stylesheet" type="text/css" href="nav.css">
+  <script>
+	var graph = {}, nr;
+	var template = `
+	  	<svg xmlns="http://www.w3.org/2000/svg" x="-50" y="-50" width="100" height="100" class="node">
+			<circle id="circle" cx="50%" cy="50%" r="25%"  style="cursor:pointer;stroke:black" fill="white" stroke-width="2px"/>
+			<text id="text" x="50%" y="50%" style="fill:black;font-size: 100%;font-weight:bold;text-anchor: middle" alignment-baseline="middle">idk</text>
+		</svg>`;
+	var path_template = `<path xmlns="http://www.w3.org/2000/svg" class="path" d="" stroke="black"/>`;
+
+	function get_node(text){
+		return document.getElementById("node-"+text)
+	}
+
+	function get_paths_between(t1, t2){
+		return document.getElementsByClassName("path "+t1+" "+t2)
+	}
+
+	function get_paths(text){
+		return document.getElementsByClassName("path "+text)
+	}
+
+	function get_node_text(node){
+		return node.getElementById("text").innerHTML
+	}
+
+	function get_node_pos(text){
+		let node = get_node(text)
+		let offset = Number(node.getAttribute("width"))/2
+		return [Number(node.getAttribute("x"))+offset, Number(node.getAttribute("y"))+offset]
+	}
+
+	function set_path_pos(path, x1, y1, x2, y2){
+		path.setAttribute("d", "M"+x1+" "+y1+" "+x2+" "+y2)
+	}
+
+	function set_node_pos(t1, x, y){
+		let n1 = get_node(t1)
+
+		let offset = Number(n1.getAttribute("width"))/2
+		n1.setAttribute("x", x-offset)
+		n1.setAttribute("y", y-offset)
+
+		let p1 = get_node_pos(t1)
+
+		for(let i = 0; i < graph[t1].length; i++){
+			let t2 = graph[t1][i]
+
+			let path = get_paths_between(t1, t2)[0]
+			let p2 = get_node_pos(t2)
+			set_path_pos(path, p1[0], p1[1], p2[0], p2[1])
+		}
+	}
+
+	function add_path(t1, t2){
+		if(!get_node(t1)){
+			add_node_rand(t1)
+		}
+		if(!get_node(t2)){
+			add_node_rand(t2)
+		}
+
+		let paths = document.getElementById("paths")
+
+		graph[t1].push(t2)
+		graph[t2].push(t1)
+
+		let path = new DOMParser().parseFromString(path_template, "image/svg+xml").firstChild
+		paths.appendChild(path)
+		path.setAttribute("class", "path "+t1+" "+t2)
+
+		let p1 = get_node_pos(t1)
+		let p2 = get_node_pos(t2)
+
+		set_path_pos(path, p1[0], p1[1], p2[0], p2[1])
+	}
+
+	function sort_number(a, b){
+		return a-b
+	}
+
+	function next_number(){
+		let nodes = document.getElementById('nodes').childNodes;
+		let numbers = []
+		for(let i = 0; i < nodes.length; i++){
+			let number = parseInt(get_node_text(nodes[i]))
+			if(number != NaN){
+				numbers.push(number)
+			}
+		}
+		numbers.sort(sort_number)
+
+		let number = 1
+		for(let i = 0; i < numbers.length; i++){
+			if(number == numbers[i]){
+				number++
+			}else{
+				break
+			}
+		}
+		return number
+	}
+
+	function add_node(x, y, text) {
+		if(!get_node(text)){
+			let nodes = document.getElementById('nodes');
+			if (!text) {
+				text = next_number().toString()
+			}
+
+			graph[text] = []
+
+			let node = new DOMParser().parseFromString(template, "image/svg+xml").firstChild;
+			nodes.appendChild(node);
+
+			node.setAttribute("id", "node-"+text);
+			node.getElementById("text").innerHTML = text;
+			set_node_pos(text, x, y)
+		}
+	}
+
+	function reset_graph() {
+		nr = 0
+		graph = {}
+
+		let to_remove = document.getElementsByClassName('node');
+		while(to_remove.length > 0)
+			to_remove[0].parentNode.removeChild(to_remove[0]);
+
+		to_remove = document.getElementsByClassName('path');
+		while(to_remove.length > 0)
+			to_remove[0].parentNode.removeChild(to_remove[0]);
+	}
+
+	function rand(min, max) {
+		return Math.random() * (max - min) + min;
+	}
+
+	function add_node_rand(text){
+		add_node(rand(100, 400), rand(100, 400), text)
+	}
+
+	function process_input() {
+		reset_graph();
+		let textBox = document.getElementById('textBox');
+		let input = textBox.value.split("\n");
+		for(let i = 0; i < input.length; i++){
+			let line = input[i].split(" ")
+			console.log( line[0])
+			if(line.length == 1 && line[0]!=""){
+				add_node_rand(line[0])
+			}else if(line.length == 2){
+				add_path(line[0], line[1])
+			}
+		}
+	}
+
+	function drag_mouse_down(event){
+		event.preventDefault();
+
+		let t = get_node_text(this)
+		set_node_pos(t, event.offsetX, event.offsetY)
+
+		this.onmousemove = drag;
+		document.onmouseup = close_drag
+	}
+
+	function drag(event) {
+		event.preventDefault();
+
+		let t = get_node_text(this)
+		set_node_pos(t, event.offsetX, event.offsetY)
+  	}
+
+  	function close_drag(event){
+		let nodes = document.getElementById('nodes').childNodes;
+		for(let i = 0; i < nodes.length; i++){
+			nodes[i].onmousemove = null
+		}
+  	}
+
+  	function get_node_circle(text){
+  		let node = get_node(text)
+  		let circle = node.getElementById("circle")
+  		return circle
+  	}
+
+  	function set_node_color(text, color){
+  		get_node_circle(text).setAttribute("fill", color)
+  	}
+
+  	function reset_color(color){
+		let nodes = document.getElementById('nodes').childNodes;
+		for(let i = 0; i < nodes.length; i++){
+			set_node_color(get_node_text(nodes[i]), color)
+		}
+  	}
+
+  	function set_node_stroke_width(text, width){
+  		get_node_circle(text).setAttribute("stroke-width", width)
+  	}
+	</script>
+
+	<script>
+		var action
+		function set_action(event){
+			action = event.target.value
+			let nodes = document.getElementById('nodes').childNodes;
+			let graph_svg = document.getElementById('graph')
+			reset_color("white")
+			if(action == "add"){
+				for(let i = 0; i < nodes.length; i++){
+					nodes[i].onmousedown = null
+				}
+				graph_svg.setAttribute("onclick", "add_node(event.offsetX, event.offsetY)")
+			}else if(action == "link"){
+				for(let i = 0; i < nodes.length; i++){
+					nodes[i].onmousedown = link
+				}
+				graph_svg.setAttribute("onclick", "")
+			}else if(action == "move"){
+				for(let i = 0; i < nodes.length; i++){
+					nodes[i].onmousedown = drag_mouse_down
+				}
+				graph_svg.setAttribute("onclick", "")
+			}else if(action == "dfs"){
+				for(let i = 0; i < nodes.length; i++){
+					nodes[i].onmousedown = dfs
+				}
+				graph_svg.setAttribute("onclick", "")
+			}else if(action == "delete"){
+				for(let i = 0; i < nodes.length; i++){
+					nodes[i].onmousedown = delete_node
+				}
+				graph_svg.setAttribute("onclick", "")
+			}
+		}
+
+		async function sleep(ms) {
+  			return new Promise(resolve => setTimeout(resolve, ms));
+		}
+		var dfs_delay = 1000
+		async function _dfs(t1){
+			let nodes = graph[t1]
+			for(let i = 0; i < nodes.length; i++){
+				let t2 = nodes[i]
+				if(!(t2 in visited)){
+					await sleep(dfs_delay)
+					visited[t2] = 1
+					set_node_color(t2, "blue")
+					await _dfs(t2)
+				}
+			}
+		}
+
+		var visited
+		async function dfs(event){
+			if(!visited){
+				reset_color("white")
+				let text = get_node_text(this)
+				visited = {}
+				visited[text] = 1
+				set_node_color(text, "yellow")
+				await _dfs(text)
+				visited = null
+			}
+		}
+
+		var linking
+		function link(event){
+			let t1 = get_node_text(this)
+			if(!linking){
+				set_node_stroke_width(t1, 4)
+				linking = t1
+			}else if(linking == t1){
+				set_node_stroke_width(t1, 2)
+				linking = null
+			}else{
+				let t2 = linking
+				set_node_stroke_width(t2, 2)
+				let paths = get_paths_between(t1, t2)
+				console.log(paths)
+				if(paths.length == 0){
+					add_path(t1, t2)
+				}
+				linking = null
+			}
+		}
+
+		function delete_node(event){
+			let text = get_node_text(this)
+			let paths = get_paths(text)
+			while(paths.length > 0){
+				paths[0].parentNode.removeChild(paths[0])
+			}
+			this.parentNode.removeChild(this)
+		}
+	</script>
+</head>
+
+<body>
+
+  <nav>
+    <ul>
+      <li>
+        <a href="main.html">Graph simulator</a>
+      </li>
+      <li>
+        <a href="npatrat.html">Sorting algorithm</a>
+      </li>
+      <li>
+        <a href="bitbucket.html">Binary search algorithm</a>
+      </li>
+      <li>
+        <a href="interclasare.html">Interclasation</a>
+      </li>
+    </ul>
+    </nav>
+
+<div class ='main'>
+
+	<div class = 'col' style = 'float: left:'>
+		<textarea id = 'textBox'></textarea>
+		<button type = 'button' onclick = 'process_input()' class = "btn first">
+			Create graph.
+		</button>
+
+	</div>
+
+
+	<div class = 'col' style = "float:right;">
+		<svg style = 'width: 500px; height: 500px' id="graph">
+			<g id = 'paths'></g>
+			<g style = 'cursor:pointer' id = 'nodes'></g>
+		</svg>
+	</div>
+</div>
+<input type="radio" name="action" value="add" onclick="set_action(event)"> Add
+		<input type="radio" name="action" value="link" onclick="set_action(event)"> Link
+		<input type="radio" name="action" value="move" onclick="set_action(event)"> Move
+		<input type="radio" name="action" value="dfs" onclick="set_action(event)"> Dfs
+		<input type="radio" name="action" value="delete" onclick="set_action(event)"> Delete
+
+</body>
+</html>
